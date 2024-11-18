@@ -1,0 +1,40 @@
+
+* Средний интервал между заявками 1/0.9 = 1.1111 с
+GENERATE (Exponential(33,0,1.1111))
+
+* Направляем заявку в прибор
+TRANSFER 0.45 ROUTE_P1	; в П1
+TRANSFER 0.6666 ROUTE_P2	; в П2
+TRANSFER ,ROUTE_P3  	; в П3
+
+* Прибор П1
+ROUTE_P1 	TEST L Q$buf1,1,LOST		; Проверка, что в очереди есть место, иначе - потеря заявки
+	QUEUE buf1		; Вход в очередь
+	SEIZE uzel1		; Захват прибора
+	DEPART buf1		; Выход из очереди
+	ADVANCE (Exponential(77,0,2))	; Обслуживание (экспон. со средн. 2 сек)
+	RELEASE uzel1		; Выход из прибора
+	TRANSFER ,OUT
+
+* Прибор П2
+ROUTE_P2 	TEST E F$uzel2,0,LOST		; Проверка, что прибор свободен, иначе - потеря заявки
+	SEIZE uzel2		; Захват прибора
+	ADVANCE (Exponential(88,0,2))	; Обслуживание (экспон. со средн. 2 сек)
+	RELEASE uzel2 		; Выход из прибора
+	TRANSFER ,OUT
+
+* Прибор П3
+ROUTE_P3 	TEST L Q$buf3,1,LOST		; Проверка, что в очереди есть место, иначе - потеря заявки
+	QUEUE buf3		; Вход в очередь
+	SEIZE uzel3		; Захват прибора
+	DEPART buf3		; Выход из очереди
+	ADVANCE (Exponential(99,0,2))	; Обслуживание (экспон. со средн. 2 сек)
+	RELEASE uzel3		; Выход из прибора
+	TRANSFER ,OUT
+
+* Конец
+OUT 	TERMINATE 1        ; Выход заявки
+LOST 	TERMINATE 1        ; Потеря заявки
+
+
+START 1000
